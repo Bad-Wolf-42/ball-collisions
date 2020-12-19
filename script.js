@@ -9,7 +9,7 @@ let mouse = {
   holdingBall: false
 }
 
-const maxBalls = 20;
+const maxBalls = 30;
 let ballsArray = [];
 
 let cueBall = {
@@ -58,7 +58,8 @@ class Ball {
     this.vx = 0;
     this.vy = 0;
     this.radius = 10;
-    this.color = 'lime';
+    this.hue = this.x / canvas.width * 360;
+    this.color = `hsla(${this.hue}, 100%, 50%, 1)`;
   }
   draw() {
     ctx.fillStyle = this.color;
@@ -79,6 +80,8 @@ class Ball {
     this.y += this.vy;
     this.vx *= friction;
     this.vy *= friction;
+    this.hue = this.x / canvas.width * 360;
+    this.color = `hsla(${this.hue}, 100%, 50%, 1)`;
   }
 }
 
@@ -93,8 +96,8 @@ function shoot() {
 
 function impact(angle, ball, cue) {
   let cueSpeed = Math.sqrt(cue.vx * cue.vx + cue.vy * cue.vy);
-  let vx = Math.cos(angle) * cueSpeed / 3; //5
-  let vy = Math.sin(angle) * cueSpeed / 3;
+  let vx = Math.cos(angle) * cueSpeed / 5; //5
+  let vy = Math.sin(angle) * cueSpeed / 5;
   ball.vx += vx;
   ball.vy += vy;
 }
@@ -107,7 +110,6 @@ function handleCollisions() {
     let distance = Math.sqrt(dx * dx + dy * dy);
     let theta = Math.atan2(dy, dx);
     if (distance < ballsArray[i].radius + cueBall.radius) {
-      ballsArray[i].color = 'red';
       impact(theta, ballsArray[i], cueBall);
     }
   }
