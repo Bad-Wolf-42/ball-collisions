@@ -9,7 +9,7 @@ let mouse = {
   holdingBall: false
 }
 
-const maxBalls = 5;
+const maxBalls = 10;
 let ballsArray = [];
 
 let cueBall = {
@@ -42,7 +42,7 @@ let cueBall = {
     }
     this.x += this.vx;
     this.y += this.vy;
-    if (this.x - this.radius > canvas.width || this.x + this.radius < 0 || this.y + this.radius < 0) {
+    if (this.x - this.radius > canvas.width || this.x + this.radius < 0 || this.y + this.radius < 0 || this.y - this.radius > canvas.height) {
       this.vx = 0;
       this.vy = 0;
       this.x = this.originX;
@@ -83,6 +83,17 @@ function shoot() {
   mouse.holdingBall = false;
 }
 
+function handleCollisions() {
+  for (i = 0; i < ballsArray.length; i++) {
+    let dx = ballsArray[i].x - cueBall.x;
+    let dy = ballsArray[i].y - cueBall.y;
+    let distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance < ballsArray[i].radius + cueBall.radius) {
+      ballsArray[i].color = 'red';
+    }
+  }
+}
+
 function generateBalls() {
   for (i = 0; i < maxBalls; i++) {
     ballsArray.push(new Ball);
@@ -97,6 +108,7 @@ function animate() {
   }
   cueBall.update();
   cueBall.draw();
+  handleCollisions();
   requestAnimationFrame(animate);
 }
 
