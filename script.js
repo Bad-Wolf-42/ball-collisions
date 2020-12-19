@@ -9,7 +9,7 @@ let mouse = {
   holdingBall: false
 }
 
-const maxBalls = 10;
+const maxBalls = 20;
 let ballsArray = [];
 
 let cueBall = {
@@ -54,7 +54,7 @@ let cueBall = {
 class Ball {
   constructor() {
     this.x = Math.random() * canvas.width;
-    this.y = Math.random() * canvas.height / 2;
+    this.y = Math.random() * canvas.height;
     this.vx = 0;
     this.vy = 0;
     this.radius = 10;
@@ -68,9 +68,17 @@ class Ball {
     ctx.closePath();
   }
   update() {
-    //acceleration; friction
+    let friction = 0.99;
+    if (this.x + this.radius >= canvas.width || this.x - this.radius <= 0) {
+      this.vx = -this.vx;
+    }
+    if (this.y + this.radius >= canvas.height || this.y - this.radius <= 0) {
+      this.vy = - this.vy;
+    }
     this.x += this.vx;
     this.y += this.vy;
+    this.vx *= friction;
+    this.vy *= friction;
   }
 }
 
@@ -83,13 +91,37 @@ function shoot() {
   mouse.holdingBall = false;
 }
 
+function impact(angle, ball, cue) {
+  let cueSpeed = Math.sqrt(cue.vx * cue.vx + cue.vy * cue.vy);
+  let vx = Math.cos(angle) * cueSpeed / 3; //5
+  let vy = Math.sin(angle) * cueSpeed / 3;
+  ball.vx += vx;
+  ball.vy += vy;
+}
+
 function handleCollisions() {
+  //compare target balls and cue
   for (i = 0; i < ballsArray.length; i++) {
     let dx = ballsArray[i].x - cueBall.x;
     let dy = ballsArray[i].y - cueBall.y;
     let distance = Math.sqrt(dx * dx + dy * dy);
+    let theta = Math.atan2(dy, dx);
     if (distance < ballsArray[i].radius + cueBall.radius) {
       ballsArray[i].color = 'red';
+      impact(theta, ballsArray[i], cueBall);
+    }
+  }
+  //compare between moving target ballSpeed
+  for (i = 0; i < ballsArray.length; i++) {
+    for (j = 0; j < ballsArray.length; j++) {
+      if (i === j) continue;
+      let dx = ballsArray[i].x - ballsArray[j].x;
+      let dy = ballsArray[i].y - ballsArray[j].y;
+      let distance = Math.sqrt(dx * dx + dy * dy);
+      let theta = Math.atan2(dy, dx);
+      if (distance < ballsArray[i].radius + ballsArray[j].radius) {
+        impact(theta, ballsArray[i], ballsArray[j]);
+      }
     }
   }
 }
